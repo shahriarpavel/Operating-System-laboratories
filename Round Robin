@@ -1,0 +1,58 @@
+from collections import deque
+n = int(input("Enter number of processes: "))
+processes = []
+for i in range(n):
+  at , bt = map(int, input(f"Enter Arrival Time and Burst Time for P{i+1}: ").split())
+  processes.append([i+1, at, bt, bt, 0, 0 , 0])
+tq = int(input("Enter time quantum: "))
+
+processes.sort(key=lambda x: x[1])
+
+queue = deque()
+time = 0
+completed = 0
+
+while completed < n :
+  for i in range(n):
+    if processes[i][1] <= time and processes[i][3] > 0 and i not in queue:
+      queue.append(i)
+
+  if not queue:
+      time += 1
+      continue
+
+  index = queue.popleft()
+  run_time = min(tq, processes[index][3])
+  time += run_time
+  processes[index][3] -= run_time
+
+  for i in range(n):
+   if processes[i][1] <= time and processes[i][3] > 0 and i not in queue and i != index:
+    queue.append(i)
+
+  if processes[index][3]==0:
+    processes[index][4] = time
+    processes[index][5] = processes[index][4] - processes[index][1]
+    processes[index][6] = processes[index][5] - processes[index][2]
+    completed+=1
+  else:
+    queue.append(index)
+
+
+  processes.sort(key=lambda x: x[0])
+
+  print("\nProcess\tAT\tBT\tCT\tTAT\tWT")
+
+  total_tat = 0
+  total_wt = 0
+
+  for x in processes:
+   print(f"P{x[0]}\t{x[1]}\t{x[2]}\t{x[4]}\t{x[5]}\t{x[6]}")
+   total_tat += x[5]
+   total_wt += x[6]
+
+  avg_tat = total_tat / n
+  avg_wt = total_wt / n
+
+  print(f"\nAverage Turnaround Time: {avg_tat:.2f}")
+  print(f"Average Waiting Time: {avg_wt:.2f}")
