@@ -1,0 +1,59 @@
+n = int(input("Enter number of processes: "))
+processes = []
+
+print("PID-AT-BT-Priority")
+for _ in range(n):
+    pid, at, bt, priority = input().split()
+    processes.append({
+        "pid": pid,
+        "at": int(at),
+        "bt": int(bt),
+        "priority": int(priority),
+        "ct": 0,
+        "completed": False
+    })
+
+processes.sort(key=lambda p: p["at"])
+
+current_time = 0
+completed_count = 0
+gantt = []
+
+while completed_count < n:
+    available = [p for p in processes if p["at"] <= current_time and not p["completed"]]
+
+    if not available:
+        next_arrival = min(p["at"] for p in processes if not p["completed"])
+        current_time = next_arrival
+        continue
+
+    current_process = min(available, key=lambda p: (p["priority"], p["at"]))
+
+    start_time = current_time
+    current_time += current_process["bt"]
+    current_process["ct"] = current_time
+    current_process["completed"] = True
+    completed_count += 1
+
+    gantt.append((current_process["pid"], start_time, current_time))
+
+total_tat = 0
+total_wt = 0
+
+for p in processes:
+    p["tat"] = p["ct"] - p["at"]
+    p["wt"] = p["tat"] - p["bt"]
+    total_tat += p["tat"]
+    total_wt += p["wt"]
+
+print("\nPID\tAT\tBT\tPriority\tCT\tTAT\tWT")
+for p in processes:
+    print(f"{p['pid']}\t{p['at']}\t{p['bt']}\t{p['priority']}\t\t{p['ct']}\t{p['tat']}\t{p['wt']}")
+
+print("\nAverage Turnaround Time :", total_tat / n)
+print("Average Waiting Time    :", total_wt / n)
+
+print("\nGantt Chart (PID: start→end):")
+for pid, st, et in gantt:
+    print(f"{pid}: {st}→{et}", end="  ")
+print()
