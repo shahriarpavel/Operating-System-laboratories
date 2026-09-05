@@ -1,0 +1,70 @@
+n = int(input("Enter number of processes: "))
+
+processes = []
+
+print("PID-AT-BT-Priority")
+
+for _ in range(n):
+    pid, at, bt, priority = input().split()
+
+    processes.append({
+        "pid": pid,
+        "at": int(at),
+        "bt": int(bt),
+        "priority": int(priority),
+        "remaining": int(bt),
+        "ct": 0
+    })
+
+processes.sort(key=lambda p: p["at"])
+
+current_time = 0
+completed = 0
+
+while completed < n:
+
+    ready = [
+        p for p in processes
+        if p["at"] <= current_time and p["remaining"] > 0
+    ]
+
+    if not ready:
+        current_time = min(
+            p["at"] for p in processes
+            if p["remaining"] > 0 and p["at"] > current_time
+        )
+        continue
+
+    current = min(
+        ready,
+        key=lambda p: (p["priority"], p["at"])
+    )
+
+    current["remaining"] -= 1
+    current_time += 1
+
+    if current["remaining"] == 0:
+        current["ct"] = current_time
+        completed += 1
+
+total_tat = 0
+total_wt = 0
+
+for p in processes:
+    p["tat"] = p["ct"] - p["at"]
+    p["wt"] = p["tat"] - p["bt"]
+
+    total_tat += p["tat"]
+    total_wt += p["wt"]
+
+print("\nPID\tAT\tBT\tPriority\tCT\tTAT\tWT")
+
+for p in processes:
+    print(
+        f"{p['pid']}\t{p['at']}\t{p['bt']}\t"
+        f"{p['priority']}\t\t{p['ct']}\t"
+        f"{p['tat']}\t{p['wt']}"
+    )
+
+print("\nAverage Turnaround Time :", total_tat / n)
+print("Average Waiting Time    :", total_wt / n)
