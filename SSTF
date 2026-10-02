@@ -1,0 +1,32 @@
+n = int(input("Enter the number of processes: "))
+
+print("Req Seq : ")
+track = []
+
+for i in range(n):
+    track.append(int(input()))
+
+head = int(input("Enter the head position: "))
+
+remaining = track.copy()
+result=[]
+
+total_seek=0
+current_head=head
+
+while remaining:
+          closest = min(remaining, key = lambda x:abs(x-current_head))
+          seek = abs(closest- current_head)
+          total_seek+=seek
+          result.append((closest,seek))
+          current_head = closest
+          remaining.remove(closest)
+
+print(f"\n{"Next Track":<12}{"seek distance"}")
+
+print("__" * 25)
+for track, seek in result:
+           print(f"{track:<12}{seek}")
+
+print("__" * 25)
+print(f"Total Seek: {total_seek}")
